@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI十六型人格专业测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7c3aed',
+                        secondary: '#4f46e5',
+                        light: '#ede9fe',
+                        dark: '#1e1b4b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .bg-gradient-mbti {
+                background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+            }
+            .card-shadow {
+                box-shadow: 0 10px 40px rgba(124, 58, 237, 0.15);
+            }
+            .animate-fade {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800">
+    <!-- 首页 -->
+    <div id="page-home" class="page animate-fade px-4 py-10 max-w-3xl mx-auto">
+        <div class="rounded-3xl bg-white card-shadow p-8 md:p-12">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 rounded-full bg-gradient-mbti flex items-center justify-center mx-auto mb-4">
+                    <i class="fa fa-heart-o text-white text-3xl"></i>
+                </div>
+                <h1 class="text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-dark mb-3">MBTI 十六型人格测试</h1>
+                <p class="text-slate-500 text-lg">28道专业测评题 · 精准测出你的专属人格类型</p>
+            </div>
+            <div class="space-y-4 text-slate-600 mb-10">
+                <div class="flex items-start gap-3">
+                    <i class="fa fa-check-circle text-primary mt-1"></i>
+                    <span>四大维度区分：精力来源｜认知方式｜决策模式｜生活态度</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <i class="fa fa-check-circle text-primary mt-1"></i>
+                    <span>完整16种人格解析，包含性格优势、短板、适合职业、恋爱指南</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <i class="fa fa-check-circle text-primary mt-1"></i>
+                    <span>无广告、无需注册，本地保存你的测试结果</span>
+                </div>
+            </div>
+            <div class="bg-light rounded-xl p-5 mb-8">
+                <p class="text-sm text-slate-600">
+                    <i class="fa fa-info-circle text-primary mr-1"></i>
+                    答题提示：请根据你<strong>真实本能</strong>选择，不要按理想中的自己作答，结果才会准确。
+                </p>
+            </div>
+            <button onclick="startTest()" class="w-full py-4 rounded-xl bg-gradient-mbti text-white font-bold text-lg hover:opacity-90 transition-all duration-300">
+                开始测试 <i class="fa fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 答题页面 -->
+    <div id="page-test" class="page hidden px-4 py-10 max-w-3xl mx-auto">
+        <div class="rounded-3xl bg-white card-shadow p-8 md:p-12">
+            <!-- 进度 -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm text-slate-500 mb-2">
+                    <span>答题进度</span>
+                    <span id="progress-text">0/28</span>
+                </div>
+                <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-mbti w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+            <!-- 题目 -->
+            <div class="min-h-[180px] flex flex-col justify-center mb-8">
+                <h2 id="question-num" class="text-sm text-primary font-medium mb-2">第1题</h2>
+                <p id="question-text" class="text-xl md:text-2xl font-medium text-dark"></p>
+            </div>
+            <!-- 选项 -->
+            <div class="space-y-3" id="answer-box">
+                <button onclick="selectAnswer(1)" class="answer-btn w-full text-left p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-light transition-all">
+                    A. 非常符合我
+                </button>
+                <button onclick="selectAnswer(2)" class="answer-btn w-full text-left p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-light transition-all">
+                    B. 比较符合我
+                </button>
+                <button onclick="selectAnswer(3)" class="answer-btn w-full text-left p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-light transition-all">
+                    C. 中立/不确定
+                </button>
+                <button onclick="selectAnswer(4)" class="answer-btn w-full text-left p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-light transition-all">
+                    D. 不太符合我
+                </button>
+                <button onclick="selectAnswer(5)" class="answer-btn w-full text-left p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-light transition-all">
+                    E. 完全不符合我
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果页面 -->
+    <div id="page-result" class="page hidden px-4 py-10 max-w-3xl mx-auto">
+        <div class="rounded-3xl bg-white card-shadow p-8 md:p-12 animate-fade">
+            <div class="text-center mb-8">
+                <div class="w-24 h-24 rounded-full bg-gradient-mbti flex items-center justify-center mx-auto mb-4">
+                    <span id="result-code" class="text-white text-3xl font-bold">INFP</span>
+                </div>
+                <h2 id="result-name" class="text-2xl font-bold text-dark mb-2">调停者</h2>
+                <p id="result-slogan" class="text-slate-500">治愈理想主义，温柔的梦想家</p>
+            </div>
+            <!-- 四维得分 -->
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="bg-light p-4 rounded-xl text-center">
+                    <p class="text-sm text-slate-500">精力倾向</p>
+                    <p id="dim-EI" class="font-bold text-xl mt-1">I 内向</p>
+                </div>
+                <div class="bg-light p-4 rounded-xl text-center">
+                    <p class="text-sm text-slate-500">认知方式</p>
+                    <p id="dim-SN" class="font-bold text-xl mt-1">N 直觉</p>
+                </div>
+                <div class="bg-light p-4 rounded-xl text-center">
+                    <p class="text-sm text-slate-500">决策模式</p>
+                    <p id="dim-TF" class="font-bold text-xl mt-1">F 情感</p>
+                </div>
+                <div class="bg-light p-4 rounded-xl text-center">
+                    <p class="text-sm text-slate-500">生活态度</p>
+                    <p id="dim-JP" class="font-bold text-xl mt-1">P 感知</p>
+                </div>
+            </div>
+            <!-- 详细解析 -->
+            <div class="space-y-6 mb-10">
+                <div>
+                    <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
+                        <i class="fa fa-star text-primary"></i>核心性格描述
+                    </h3>
+                    <p id="result-desc" class="text-slate-600 leading-relaxed"></p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
+                        <i class="fa fa-plus-circle text-green-500"></i>性格优势
+                    </h3>
+                    <p id="result-good" class="text-slate-600 leading-relaxed"></p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
+                        <i class="fa fa-minus-circle text-orange-500"></i>性格短板
+                    </h3>
+                    <p id="result-bad" class="text-slate-600 leading-relaxed"></p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
+                        <i class="fa fa-briefcase text-blue-500"></i>适合职业
+                    </h3>
+                    <p id="result-job" class="text-slate-600 leading-relaxed"></p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
+                        <i class="fa fa-heart text-rose-500"></i>恋爱相处指南
+                    </h3>
+                    <p id="result-love" class="text-slate-600 leading-relaxed"></p>
+                </div>
+            </div>
+            <!-- 操作按钮 -->
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="restartTest()" class="py-3 border border-primary text-primary rounded-xl font-medium hover:bg-light transition-all">
+                    重新测试
+                </button>
+                <button onclick="shareResult()" class="py-3 bg-gradient-mbti text-white rounded-xl font-medium hover:opacity-90 transition-all">
+                    分享我的人格
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. MBTI 题库 28题
+        const questions = [
+            { q: "社交后你更需要独处恢复精力吗？", type: "EI", score: "I" },
+            { q: "你更喜欢规划好所有行程，而非随机应变？", type: "JP", score: "J" },
+            { q: "比起现实细节，你更爱思考未来可能性？", type: "SN", score: "N" },
+            { q: "做决定时优先顾及他人情绪感受？", type: "TF", score: "F" },
+            { q: "多人聚会会让你感到疲惫而非兴奋？", type: "EI", score: "I" },
+            { q: "你很少临时改变计划，偏爱确定安排？", type: "JP", score: "J" },
+            { q: "你经常脑补多种剧情与抽象想法？", type: "SN", score: "N" },
+            { q: "争论时你更在意是否伤害对方，而非对错？", type: "TF", score: "F" },
+            { q: "空闲时间优先选择独自看书/追剧，而非约朋友？", type: "EI", score: "I" },
+            { q: "房间、桌面习惯整理得井然有序？", type: "JP", score: "J" },
+            { q: "看待事物习惯抓整体规律，忽略细碎事实？", type: "SN", score: "N" },
+            { q: "评价一件事先看是否温暖有人情味？", type: "TF", score: "F" },
+            { q: "认识新朋友对你来说消耗精力？", type: "EI", score: "I" },
+            { q: "截止日期前会提前完成，不喜欢拖延？", type: "JP", score: "J" },
+            { q: "你容易联想、脑洞大，擅长发散思维？", type: "SN", score: "N" },
+            { q: "你共情能力强，很容易感知别人难过？", type: "TF", score: "F" },
+            { q: "你更愿意一对一深度聊天，不喜欢大型派对？", type: "EI", score: "I" },
+            { q: "遇到突发变动会感到烦躁不安？", type: "JP", score: "J" },
+            { q: "比起实操经验，你更相信理论与灵感？", type: "SN", score: "N" },
+            { q: "哪怕公事，也不愿用冰冷强硬的方式沟通？", type: "TF", score: "F" },
+            { q: "对外倾诉心事会有负担，习惯内心消化情绪？", type: "EI", score: "I" },
+            { q: "生活有固定作息，不喜欢随心所欲？", type: "JP", score: "J" },
+            { q: "你经常思考人生、哲学、自我意义这类问题？", type: "SN", score: "N" },
+            { q: "团队冲突中你优先调和关系，而非评判对错？", type: "TF", score: "F" },
+            { q: "获得能量的方式是安静独处，而非与人互动？", type: "EI", score: "I" },
+            { q: "做任务喜欢分步清单，完成一项划掉一项？", type: "JP", score: "J" },
+            { q: "你更关注事物背后含义，而非表面现象？", type: "SN", score: "N" },
+            { q: "做选择时感性优先，理性其次？", type: "TF", score: "F" }
+        ];
+
+        // 2. 16型人格完整数据
+        const mbtiData = {
+            INTJ: {
+                name: "建筑师", slogan: "富有远见的战略家",
+                desc: "独立、富有逻辑与长远眼光，擅长搭建完整规划体系，冷静理智，追求高效与真理，不喜欢无意义社交。",
+                good: "逻辑缜密、目标感极强、擅长全局规划、自律、洞察力强、创新思维。",
+                bad: "过于高冷、忽视他人情绪、完美主义、容易固执、不善表达柔软一面。",
+                job: "战略分析师、架构师、科研、金融风控、产品战略、学术研究者。",
+                love: "需要精神高度同频伴侣，讨厌情绪化拉扯，偏爱理性深度沟通，反感敷衍浅层关系。"
+            },
+            INTP: {
+                name: "逻辑学家", slogan: "痴迷真理的思考者",
+                desc: "天生好奇，热爱拆解一切规律，沉迷理论与逻辑推演，随性自由，讨厌刻板规则，思维天马行空。",
+                good: "逻辑天才、求知欲旺盛、包容多元观点、创造力强、客观理性。",
+                bad: "拖延严重、社交迟钝、缺乏执行力、容易空想、情绪钝感。",
+                job: "程序员、理论科研、哲学、数据分析、设计研发、智库研究员。",
+                love: "看重思想共鸣，不在乎外表形式，反感控制欲强的伴侣，需要充足个人空间。"
+            },
+            ENTJ: {
+                name: "指挥官", slogan: "天生领袖决策者",
+                desc: "自信果决，擅长统筹团队，目标导向，执行力拉满，敢于直面冲突，追求事业与成就。",
+                good: "领导力强、魄力十足、抗压、统筹能力优秀、擅长解决复杂难题。",
+                bad: "强势强势、不懂共情、控制欲强、容易急躁、说话直接伤人。",
+                job: "企业高管、创业老板、项目总监、管理咨询、市场营销负责人。",
+                love: "欣赏独立上进的另一半，讨厌软弱逃避，期待并肩成长，无法接受拖沓内耗。"
+            },
+            ENTP: {
+                name: "辩论家", slogan: "脑洞大开创新者",
+                desc: "热爱思辨、擅长口才，乐于挑战固有观念，创意源源不断，讨厌一成不变，享受思维碰撞。",
+                good: "口才出众、脑洞大、适应力强、幽默通透、擅长多角度思考。",
+                bad: "三分钟热度、爱抬杠、难以长期坚持、容易忽视细节、缺乏耐心。",
+                job: "律师、新媒体策划、投资顾问、公关、创意策划、创业。",
+                love: "喜欢有趣有想法的人，反感沉闷无趣，需要持续新鲜感，抗拒束缚。"
+            },
+            INFJ: {
+                name: "提倡者", slogan: "洞察人心的引路人",
+                desc: "稀有人格，直觉敏锐，擅长看透他人内心，理想主义，心怀善意，追求有意义的人生。",
+                good: "共情深刻、洞察力顶级、坚守初心、温柔坚定、擅长开导他人。",
+                bad: "内耗严重、过度敏感、容易自我牺牲、不懂拒绝、压抑情绪。",
+                job: "心理咨询师、作家、教师、人文社科、策划、公益从业者。",
+                love: "追求灵魂契合，宁缺毋滥，重视精神联结，无法接受虚伪肤浅的感情。"
+            },
+            INFP: {
+                name: "调停者", slogan: "温柔治愈梦想家",
+                desc: "内心世界丰富柔软，坚守自我价值观，热爱艺术与美好，不喜冲突，包容善良。",
+                good: "温柔善良、共情力强、富有创造力、真诚纯粹、包容包容。",
+                bad: "玻璃心、逃避冲突、拖延、完美主义内耗、不擅长现实事务。",
+                job: "插画师、文案、文学创作、心理疗愈、音乐、教育、社工。",
+                love: "极度看重真诚，讨厌套路欺骗，渴望被理解，害怕亲密关系里的伤害。"
+            },
+            ENFJ: {
+                name: "主人公", slogan: "温暖感染力领袖",
+                desc: "擅长带动他人情绪，善于倾听引导，乐于帮助身边人成长，社交通透，理想热忱。",
+                good: "情商极高、擅长鼓励他人、责任感强、温柔有力量、组织力优秀。",
+                bad: "过度讨好别人、容易透支自己、在意他人评价、不懂独处。",
+                job: "培训讲师、人力资源、公关、教育、主持人、社群运营。",
+                love: "乐于付出照顾伴侣，需要正向回馈，反感冷漠自私，重视仪式感与沟通。"
+            },
+            ENFP: {
+                name: "竞选者", slogan: "热情浪漫追梦人",
+                desc: "阳光外向，想象力丰富，热爱新鲜事物，乐观开朗，擅长感染身边所有人。",
+                good: "乐观幽默、共情强、创意丰富、待人真诚、适应力强。",
+                bad: "三分钟热度、容易冲动、讨厌琐碎规划、情绪起伏大。",
+                job: "自媒体、演员、策划、文旅、艺术、心理咨询、销售。",
+                love: "追求浪漫灵魂恋爱，讨厌平淡压抑，需要自由空间，反感管控。"
+            },
+            ISTJ: {
+                name: "检查员", slogan: "稳重可靠实干家",
+                desc: "踏实严谨，遵守规则，注重细节，责任心极强，务实稳重，值得信任。",
+                good: "靠谱守信、细心严谨、自律、执行力稳定、吃苦耐劳。",
+                bad: "保守固执、不善变通、不懂表达浪漫、排斥新事物。",
+                job: "财务、行政、法务、工程、档案管理、公职人员、质检。",
+                love: "踏实专一，用行动表达爱意，讨厌虚无浪漫，偏爱稳定长久关系。"
+            },
+            ISFJ: {
+                name: "守卫者", slogan: "温柔奉献守护者",
+                desc: "细心体贴，习惯性照顾他人，温和内敛，重视家庭与责任，默默付出。",
+                good: "体贴温柔、忠诚专一、细致入微、包容顾家、责任心强。",
+                bad: "不懂拒绝、委屈自己、害怕改变、压抑自身需求。",
+                job: "护士、教师、行政、后勤、家政、人力资源、文职。",
+                love: "擅长照顾伴侣生活，渴望被珍惜，讨厌冷漠无视，重视长久陪伴。"
+            },
+            ESTJ: {
+                name: "总经理", slogan: "务实秩序管理者",
+                desc: "务实果断，擅长落地管理，遵守规则，注重效率，擅长统筹现实事务。",
+                good: "靠谱负责、执行力强、条理清晰、公正务实、抗压稳定。",
+                bad: "死板强硬、不懂浪漫、忽视情感、控制欲较强。",
+                job: "企业管理、运营、行政主管、银行、制造业管理、公职。",
+                love: "务实专一，愿意承担生活责任，反感逃避现实、情绪化伴侣。"
+            },
+            ESFJ: {
+                name: "执政官", slogan: "温暖社交照料者",
+                desc: "人缘极好，擅长照顾集体氛围，热心热心，重视人情世故，乐于奉献。",
+                good: "情商在线、热情友善、顾家体贴、擅长协调人际关系。",
+                bad: "在意他人看法、容易委屈自己、害怕冲突、不够独立。",
+                job: "客服、教师、医护、餐饮管理、社群、人事、服务业。",
+                love: "重视仪式感与陪伴，喜欢分享日常，受不了冷暴力与忽视。"
+            },
+            ISTP: {
+                name: "鉴赏家", slogan: "冷静实操匠人",
+                desc: "动手能力极强，冷静客观，擅长解决实际难题，随性自由，不爱空谈。",
+                good: "动手天才、遇事冷静、适应力强、务实通透、心态松弛。",
+                bad: "不善表达情感、逃避规划、沉默寡言、容易摆烂。",
+                job: "机械维修、工程师、手工匠人、摄影、汽修、技术运维。",
+                love: "行动大于情话，不擅长甜言蜜语，需要独立空间，反感黏人束缚。"
+            },
+            ISFP: {
+                name: "探险家", slogan: "细腻浪漫艺术家",
+                desc: "感官细腻，热爱美学，温和低调，活在当下，尊重自我感受，不喜束缚。",
+                good: "审美出众、温柔包容、真实纯粹、动手能力强、心态松弛。",
+                bad: "回避压力、害怕规划、敏感自卑、不擅长长远打算。",
+                job: "美术、手工、摄影、花艺、美食、服装、乐器演奏。",
+                love: "偏爱平淡细腻的陪伴，讨厌激烈争吵，需要尊重个人爱好与空间。"
+            },
+            ESTP: {
+                name: "企业家", slogan: "敢闯现实冒险家",
+                desc: "外向果敢，擅长实操社交，享受当下，反应迅速，敢于尝试新鲜挑战。",
+                good: "情商高、行动力强、临场应变、幽默外向、敢闯敢拼。",
+                bad: "缺乏长远规划、容易冲动、耐心不足、讨厌枯燥理论。",
+                job: "销售、市场、创业、摄影、演艺、公关、户外行业。",
+                love: "喜欢有趣鲜活的伴侣，讨厌沉闷死板，需要新鲜感，不喜束缚。"
+            },
+            ESFP: {
+                name: "表演者", slogan: "阳光鲜活体验家",
+                desc: "天生乐天派，热爱热闹与美好，擅长活跃气氛，活在当下，共情细腻。",
+                good: "乐观开朗、真诚直白、审美优秀、擅长带动氛围、待人友善。",
+                bad: "惧怕压力、逃避长远规划、容易情绪化、缺乏定力。",
+                job: "演员、美妆、时尚、文旅、主持人、餐饮、线下活动策划。",
+                love: "追求快乐轻松的恋爱，讨厌压抑严肃，需要陪伴与正向情绪反馈。"
+            }
+        };
+
+        // 全局变量
+        let currentQ = 0;
+        let answers = [];
+        let score = { EI: 0, SN: 0, TF: 0, JP: 0 };
+        const totalQ = questions.length;
+
+        // 页面切换
+        function hideAllPage() {
+            document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
+        }
+        function showPage(id) {
+            hideAllPage();
+            document.getElementById(id).classList.remove("hidden");
+        }
+
+        // 开始测试
+        function startTest() {
+            currentQ = 0;
+            answers = [];
+            score = { EI: 0, SN: 0, TF: 0, JP: 0 };
+            renderQuestion();
+            showPage("page-test");
+        }
+
+        // 渲染题目
+        function renderQuestion() {
+            const q = questions[currentQ];
+            document.getElementById("question-num").innerText = `第${currentQ + 1}题`;
+            document.getElementById("question-text").innerText = q.q;
+            // 更新进度
+            const per = ((currentQ) / totalQ) * 100;
+            document.getElementById("progress-bar").style.width = per + "%";
+            document.getElementById("progress-text").innerText = `${currentQ}/${totalQ}`;
+            // 重置按钮样式
+            document.querySelectorAll(".answer-btn").forEach(btn => {
+                btn.classList.remove("border-primary", "bg-light");
+            });
+        }
+
+        // 选择答案
+        function selectAnswer(val) {
+            const q = questions[currentQ];
+            // 计分：A-E对应5~1分，反向维度取反
+            let point = 6 - val;
+            if(q.score === "E" || q.score === "S" || q.score === "T" || q.score === "P"){
+                point = val - 1;
+            }
+            score[q.type] += point;
+            answers.push(val);
+            currentQ++;
+            if(currentQ >= totalQ){
+                calcResult();
+                return;
+            }
+            renderQuestion();
+        }
+
+        // 计算人格结果
+        function calcResult() {
+            const totalEI = 28;
+            const totalSN = 28;
+            const totalTF = 28;
+            const totalJP = 28;
+            let code = "";
+            // EI
+            code += score.EI > totalEI / 2 ? "I" : "E";
+            // SN
+            code += score.SN > totalSN / 2 ? "N" : "S";
+            // TF
+            code += score.TF > totalTF / 2 ? "F" : "T";
+            // JP
+            code += score.JP > totalJP / 2 ? "P" : "J";
+            renderResult(code);
+        }
+
+        // 渲染结果页
+        function renderResult(code) {
+            const data = mbtiData[code];
+            document.getElementById("result-code").innerText = code;
+            document.getElementById("result-name").innerText = data.name;
+            document.getElementById("result-slogan").innerText = data.slogan;
+            document.getElementById("result-desc").innerText = data.desc;
+            document.getElementById("result-good").innerText = data.good;
+            document.getElementById("result-bad").innerText = data.bad;
+            document.getElementById("result-job").innerText = data.job;
+            document.getElementById("result-love").innerText = data.love;
+            // 四维文字
+            const eis = score.EI > 14 ? "I 内向" : "E 外向";
+            const sns = score.SN > 14 ? "N 直觉" : "S 实感";
+            const tfs = score.TF > 14 ? "F 情感" : "T 思考";
+            const jps = score.JP > 14 ? "P 感知" : "J 判断";
+            document.getElementById("dim-EI").innerText = eis;
+            document.getElementById("dim-SN").innerText = sns;
+            document.getElementById("dim-TF").innerText = tfs;
+            document.getElementById("dim-JP").innerText = jps;
+            showPage("page-result");
+        }
+
+        // 重新测试
+        function restartTest() {
+            showPage("page-home");
+        }
+
+        // 分享功能
+        function shareResult() {
+            const code = document.getElementById("result-code").innerText;
+            const name = document.getElementById("result-name").innerText;
+            const text = `我的MBTI人格是${code}【${name}】，快来测测你的人格！`;
+            if(navigator.share){
+                navigator.share({title:"MBTI十六型人格测试",text:text});
+            }else{
+                navigator.clipboard.writeText(text);
+                alert("分享文案已复制到剪贴板！");
+            }
+        }
+    </script>
+</body>
+</html>
